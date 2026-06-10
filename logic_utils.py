@@ -9,32 +9,29 @@ def get_range_for_difficulty(difficulty: str):
     return 1, 100
 
 
-def parse_guess(raw: str):
-    """
-    Parse user input into an int guess.
+def parse_guess(raw: str, low: int, high: int):
+    """Strictly parse user input into an int guess within the allowed bounds."""
+    if raw is None or not raw.strip():
+        return False, None, "Please enter a guess."
 
-    Returns: (ok: bool, guess_int: int | None, error_message: str | None)
-    """
-    if raw is None or raw == "":
-        return False, None, "Enter a guess."
+    clean_raw = raw.strip()
+
+    if "." in clean_raw:
+        return False, None, f"Decimals are not allowed. Please enter a whole number between {low} and {high}."
 
     try:
-        if "." in raw:
-            value = int(float(raw))
-        else:
-            value = int(raw)
-    except Exception:
-        return False, None, "That is not a number."
+        value = int(clean_raw)
+    except ValueError:
+        return False, None, "That is not a valid number. Please enter digits only."
+
+    if value < low or value > high:
+        return False, None, f"Out of bounds! Your guess must be between {low} and {high}."
 
     return True, value, None
 
 
 def check_guess(guess, secret):
-    """
-    Compare guess to secret and return (outcome, message).
-
-    outcome examples: "Win", "Too High", "Too Low"
-    """
+    """Compare guess to secret and return (outcome, message)."""
     try:
         secret_value = int(secret)
     except (TypeError, ValueError):
@@ -47,20 +44,24 @@ def check_guess(guess, secret):
     return "Too Low", "📈 Go HIGHER!"
 
 
-def update_score(current_score: int, outcome: str, attempt_number: int):
-    """Update score based on outcome and attempt number."""
+def update_score(current_score: int, outcome: str, attempt_number: int, current_diff: int = None, prev_diff: int = None):
+    """
+    Update score dynamically:
+    - Winning grants a massive completion bonus.
+    - If it's the first guess, no trend exists (0 points).
+    - If the user gets closer to the secret, award +5 points.
+    - If the user gets farther away (or stays exactly as far away), deduct -5 points.
+    """
     if outcome == "Win":
         points = 100 - 10 * (attempt_number + 1)
-        if points < 10:
-            points = 10
-        return current_score + points
+        return current_score + max(points, 10)
 
-    if outcome == "Too High":
-        if attempt_number % 2 == 0:
-            return current_score + 5
-        return current_score - 5
+    # If there's no previous guess to compare against, score doesn't change yet
+    if current_diff is None or prev_diff is None:
+        return current_score
 
-    if outcome == "Too Low":
-        return current_score - 5
-
-    return current_score
+    # Logical validation: Did the distance shrink?
+    if current_diff < prev_diff:
+        return current_score + 5  # Warmer!
+    else:
+        return current_score - 5  # Colder or stagnated

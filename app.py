@@ -55,7 +55,7 @@ if "secret" not in st.session_state:
     st.session_state.secret = random.randint(low, high)
 
 # --- 3. CALLBACK FUNCTIONS ---
-def submit_logic():
+def submit_logic(low_bound: int, high_bound: int):
     # Fetch the input value directly from session state via its key
     user_guess = st.session_state.get(f"guess_input_{difficulty}", "")
     
@@ -63,31 +63,48 @@ def submit_logic():
         st.session_state.last_message = "Please enter a valid guess before submitting!"
         return
 
-    st.session_state.attempts += 1
-    ok, guess_int, err = parse_guess(user_guess) #FIX: Refactored logic into logic_utils.py using agent mode
+    # Pass the explicitly provided bounds to our strict parser
+    ok, guess_int, err = parse_guess(user_guess, low_bound, high_bound) 
 
     if not ok:
-        st.session_state.history.append(user_guess)
         st.session_state.last_message = err
+        return  # Short-circuit immediately! No history, no score penalization.
+
+    # --- Valid Guess Logic ---
+    st.session_state.attempts += 1
+    secret = st.session_state.secret
+    
+    # Calculate distance metrics for tracking if they are getting closer
+    current_diff = abs(guess_int - secret)
+    prev_diff = None
+    
+    if len(st.session_state.history) > 0:
+        # Get the absolute difference of their last valid guess
+        last_valid_guess = st.session_state.history[-1]
+        prev_diff = abs(last_valid_guess - secret)
+
+    # Log the valid integer to history
+    st.session_state.history.append(guess_int)
+    
+    outcome, message = check_guess(guess_int, secret) 
+    st.session_state.last_message = message
+
+    # Update score using our hot/cold progression logic
+    st.session_state.score = update_score(
+        current_score=st.session_state.score,
+        outcome=outcome,
+        attempt_number=st.session_state.attempts,
+        current_diff=current_diff,
+        prev_diff=prev_diff
+    )
+
+    if outcome == "Win":
+        st.session_state.status = "won"
     else:
-        st.session_state.history.append(guess_int)
-        outcome, message = check_guess(guess_int, st.session_state.secret) #FIX: Refactored logic into logic_utils.py using agent mode
-        st.session_state.last_message = message
+        if st.session_state.attempts >= attempt_limit:
+            st.session_state.status = "lost"
 
-        #FIX: Refactored logic into logic_utils.py using agent mode
-        st.session_state.score = update_score(
-            current_score=st.session_state.score,
-            outcome=outcome,
-            attempt_number=st.session_state.attempts,
-        )
-
-        if outcome == "Win":
-            st.session_state.status = "won"
-        else:
-            if st.session_state.attempts >= attempt_limit:
-                st.session_state.status = "lost"
-
-    # Reset input field box text by clearing its state key
+    # Clear input field box text for the next round
     st.session_state[f"guess_input_{difficulty}"] = ""
 
 
@@ -103,15 +120,12 @@ def reset_game():
 # --- 4. GAME MAIN LAYOUT ---
 st.subheader("Make a guess")
 
-# Interactive dynamic banner
 st.info(
     f"Guess a number between {low} and {high}. "
     f"Attempts left: {max(0, attempt_limit - st.session_state.attempts)}"
 )
 
-# Use expanded parameter tied to session state to prevent auto-closing
 with st.expander("Developer Debug Info", expanded=st.session_state.debug_expanded):
-    # This checkbox automatically preserves state because it updates 'debug_expanded'
     st.checkbox("Keep Debug Info visible", key="debug_expanded")
     st.write("Secret:", st.session_state.secret)
     st.write("Attempts:", st.session_state.attempts)
@@ -119,7 +133,6 @@ with st.expander("Developer Debug Info", expanded=st.session_state.debug_expande
     st.write("Difficulty:", difficulty)
     st.write("History:", st.session_state.history)
 
-# Text Input field utilizing a permanent key bound to state
 st.text_input(
     "Enter your guess:",
     key=f"guess_input_{difficulty}"
@@ -128,7 +141,8 @@ st.text_input(
 # Control Elements Row
 col1, col2, col3 = st.columns(3)
 with col1:
-    st.button("Submit Guess 🚀", key="submit_guess", on_click=submit_logic)
+    # FIX: Pass 'low' and 'high' explicitly via args to guarantee they match the sidebar configuration state!
+    st.button("Submit Guess 🚀", key="submit_guess", on_click=submit_logic, args=(low, high))
 with col2:
     st.button("New Game 🔁", key="new_game", on_click=reset_game)
 with col3:
