@@ -9,16 +9,16 @@
 > Document your experience using an AI agent (e.g., Cursor Agent, Claude, Copilot) to make multi-step changes autonomously.
 
 **What task did you give the agent?**
-
-<!-- Describe the goal you asked the agent to accomplish -->
+Challenge 1:
+1. identify three potential "edge case" inputs (e.g., negative numbers, 
+decimals, or extremely large values) that might still break the game, but do not modify the code. generate a suite of pytest cases that verify your game handles these inputs gracefully.
+2. generate the tests again but with the goal of checking the game behaves as one would expect (e.g. the edge cases do not pass because the code is buggy) -- not to check if the code behaves as one would expect the code to.
 
 **What did the agent do?**
-
-<!-- List the steps the agent took (files edited, commands run, etc.) -->
+Challenge 1: write a new file comprised of tests for expected behavior.
 
 **What did you have to verify or fix manually?**
-
-<!-- Describe anything the agent got wrong or that required human review -->
+Challenge 1: I had to prompt the agent again to correct its line of thinking.
 
 ---
 
@@ -28,9 +28,10 @@
 
 | Edge Case | Prompt Used | AI-Suggested Test | Did It Pass? | Your Reasoning |
 |-----------|-------------|-------------------|--------------|----------------|
-| | | | | |
-| | | | | |
-| | | | | |
+| negative number guess | see Challenge 1 prompts above | `test_negative_number_should_be_invalid` | X | `parse_guess` does not check negative values against the (positive) range |
+| massive guess | see Challenge 1 prompts above | `test_huge_number_should_be_invalid` | X | `parse_guess` does not check values against the range |
+| decimal number guess | see Challenge 1 prompts above | `test_decimal_input_should_be_rejected` | X | `parse_guess` truncates decimal value guesses instead of rejecting them |
+| invalid guess | see Challenge 1 prompts above | `test_invalid_guess_does_not_penalize_score` | X | the code detracts points regardless of validity of the guess instead of dropping the guess entirely |
 
 ---
 
