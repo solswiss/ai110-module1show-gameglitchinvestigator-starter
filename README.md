@@ -24,29 +24,26 @@ It wrote the code, ran away, and now the game is unplayable.
    - Keep fixing until all tests pass!
 
 ## 📝 Document Your Experience
-
-- [ ] Describe the game's purpose.
-- [ ] Detail which bugs you found.
-- [ ] Explain what fixes you applied.
+Enter with the goal of fixing an AI-generated Streamlit secret number guessing game with scoring and hint mechanisms.  
+Begin fixing glaring issues: reversed hints, mismatched difficulty settings, and faulty stats updates with Copilot.
+Dive deeper into logic flow and refactor to process guesses first and update interface afterwards with Gemini.
 
 ## 📸 Demo Walkthrough
 
 Describe your fixed game in numbered steps so a reader can follow along without watching a video:
 
-1. <!-- Describe this step -->
-2. <!-- Describe this step -->
-3. <!-- Describe this step -->
-4. <!-- Describe this step -->
-5. <!-- Add more steps as needed -->
-
-**Screenshot** *(optional)*: <!-- Insert a screenshot of your fixed, winning game here -->
+1. User enters a guess of 1 → hint "Too Low"
+2. User enters a guess of 100 → hint "Too High"
+3. Score updates after each guess
+4. Game ends after the correct guess or user exhausts tries
+5. User starts a new game with difficulty selection
 
 ## 🧪 Test Results
 
 ```
-# Paste your pytest output here, e.g.:
-# pytest tests/
-# ========================= X passed in 0.XXs =========================
+tests\test_game_logic.py ................                              [100%]
+
+============================ 16 passed in 0.13s =============================
 ```
 
 ## 🚀 Stretch Features

@@ -36,14 +36,9 @@ There were no hiccups overall, but I learned that if the overseer (me!) doesn't 
 ---
 
 ## 4. What did you learn about Streamlit and state?
-
-- How would you explain Streamlit "reruns" and session state to a friend who has never used Streamlit?
+Streamlit reruns top-down, updating all affected dynamic elements in that order. In this way, elements can be synced with variables which can be stored in the session state. It's as it reads; session state is storage for session-based data.
 
 ---
 
 ## 5. Looking ahead: your developer habits
-
-- What is one habit or strategy from this project that you want to reuse in future labs or projects?
-  - This could be a testing habit, a prompting strategy, or a way you used Git.
-- What is one thing you would do differently next time you work with AI on a coding task?
-- In one or two sentences, describe how this project changed the way you think about AI generated code.
+Moving forward, I'd like to adopt `pytest` in early workflows and maybe thorough prompting for easy bugs that call for heavy refactoring. Since it's been requested, my reflection on AI generated code is as follows: it will only be as complete as your prompt.
