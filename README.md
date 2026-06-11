@@ -128,8 +128,9 @@ FAILED tests/ext_tests.py::test_invalid_guess_does_not_penalize_score - Assertio
 
 ## 🚀 Stretch Features
 Enhanced UI with Gemini; required a couple manual fixes
-- recolor theme
+- recolor everything
+- changed fonts
 - cut the emojis, added context-appropriate kaomoji (I like the look ^^)
-- corner Rilakkuma
+- added corner Rilakkuma
 ![Screenshot of website](gg fixed (1).png)
 ![Screenshot of website](gg fixed (2).png)
